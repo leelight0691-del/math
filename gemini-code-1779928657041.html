@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>약분 연습 - 기약분수 만들기</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* 기존 스타일 그대로 유지 */
+  :root {
+    --sky: #4FC3F7; --sky-dark: #0288D1; --mint: #80CBC4;
+    --coral: #FF7043; --coral-light: #FFCCBC; --yellow: #FFD54F;
+    --yellow-dark: #F9A825; --green: #66BB6A; --green-dark: #388E3C;
+    --red: #EF5350; --purple: #AB47BC; --bg: #E3F2FD;
+    --card: #FFFFFF; --text: #1A237E; --text-soft: #5C6BC0;
+    --shadow: 0 4px 24px rgba(3,169,244,0.13);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nanum Gothic', sans-serif; background: var(--bg);
+    min-height: 100vh; color: var(--text);
+  }
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+  #screen-home { align-items: center; justify-content: center; background: linear-gradient(135deg, #E3F2FD 0%, #F3E5F5 100%); padding: 24px; }
+  .home-card { background: white; border-radius: 32px; padding: 48px 40px 40px; max-width: 420px; width: 100%; box-shadow: 0 8px 48px rgba(3,169,244,0.18); text-align: center; }
+  .home-logo { width: 90px; height: 90px; background: linear-gradient(135deg, var(--sky), var(--purple)); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
+  .home-logo svg { width: 48px; height: 48px; }
+  .home-title { font-family: 'Jua', sans-serif; font-size: 2rem; color: var(--text); margin-bottom: 6px; }
+  .home-sub { font-size: 0.95rem; color: var(--text-soft); margin-bottom: 32px; }
+  .home-btns { display: flex; flex-direction: column; gap: 14px; }
+  .btn-student { background: linear-gradient(135deg, var(--sky), var(--sky-dark)); color: white; border: none; border-radius: 18px; padding: 18px 24px; font-family: 'Jua', sans-serif; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 16px rgba(3,169,244,0.3); transition: transform 0.15s, box-shadow 0.15s; }
+  .btn-student:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(3,169,244,0.4); }
+  .btn-teacher { background: white; color: var(--purple); border: 2.5px solid var(--purple); border-radius: 18px; padding: 16px 24px; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; transition: background 0.15s; }
+  .btn-teacher:hover { background: #F3E5F5; }
+  #screen-login { align-items: center; justify-content: center; background: linear-gradient(135deg, #E3F2FD 0%, #E8F5E9 100%); padding: 24px; }
+  .login-card { background: white; border-radius: 28px; padding: 40px 36px; max-width: 380px; width: 100%; box-shadow: var(--shadow); }
+  .login-card h2 { font-family: 'Jua', sans-serif; font-size: 1.7rem; text-align: center; margin-bottom: 8px; color: var(--text); }
+  .login-card p { text-align: center; color: var(--text-soft); margin-bottom: 28px; font-size: 0.95rem; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-weight: 700; margin-bottom: 7px; color: var(--text); font-size: 0.95rem; }
+  .form-group input, .form-group select { width: 100%; border: 2px solid #E3F2FD; border-radius: 12px; padding: 13px 16px; font-family: 'Nanum Gothic', sans-serif; font-size: 1rem; color: var(--text); outline: none; transition: border-color 0.2s; }
+  .form-group input:focus, .form-group select:focus { border-color: var(--sky); }
+  .btn-primary { width: 100%; background: linear-gradient(135deg, var(--sky), var(--sky-dark)); color: white; border: none; border-radius: 14px; padding: 16px; font-family: 'Jua', sans-serif; font-size: 1.15rem; cursor: pointer; margin-top: 8px; box-shadow: 0 4px 16px rgba(3,169,244,0.25); transition: transform 0.15s; }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-back { background: none; border: none; color: var(--text-soft); cursor: pointer; font-size: 0.95rem; padding: 12px 0 0; width: 100%; text-align: center; font-family: 'Nanum Gothic', sans-serif; }
+  .btn-back:hover { color: var(--text); }
+  #screen-practice { background: linear-gradient(160deg, #E3F2FD 0%, #F3E5F5 100%); min-height: 100vh; padding: 0; }
+  .practice-header { background: white; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 12px rgba(3,169,244,0.1); position: sticky; top: 0; z-index: 10; }
+  .practice-header .student-info { font-family: 'Jua', sans-serif; font-size: 1.05rem; color: var(--sky-dark); }
+  .practice-header .btn-exit { background: #FFEBEE; color: var(--red); border: none; border-radius: 10px; padding: 8px 16px; cursor: pointer; font-weight: 700; font-size: 0.9rem; font-family: 'Nanum Gothic', sans-serif; }
+  .progress-bar-wrap { background: white; padding: 12px 24px 16px; border-bottom: 1px solid #E3F2FD; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--text-soft); margin-bottom: 7px; font-weight: 700; }
+  .progress-bar { background: #E3F2FD; border-radius: 999px; height: 10px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--sky), var(--green)); border-radius: 999px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+  .stats-row { display: flex; gap: 10px; padding: 14px 24px; }
+  .stat-chip { background: white; border-radius: 12px; padding: 8px 14px; font-size: 0.85rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  .stat-chip.correct { color: var(--green-dark); border-left: 3px solid var(--green); }
+  .stat-chip.wrong { color: var(--red); border-left: 3px solid var(--red); }
+  .stat-chip.remaining { color: var(--text-soft); border-left: 3px solid var(--sky); }
+  .question-area { padding: 20px 24px 120px; max-width: 520px; margin: 0 auto; }
+  .set-label { font-family: 'Jua', sans-serif; font-size: 0.95rem; color: var(--text-soft); margin-bottom: 12px; text-align: center; }
+  .question-card { background: white; border-radius: 28px; padding: 36px 28px 28px; box-shadow: 0 6px 32px rgba(3,169,244,0.13); text-align: center; animation: slideIn 0.3s cubic-bezier(0.4,0,0.2,1); }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(18px) scale(0.97); } to { opacity: 1; transform: none; } }
+  .q-number { font-size: 0.88rem; font-weight: 700; color: var(--text-soft); margin-bottom: 20px; }
+  .fraction-display { display: inline-flex; flex-direction: column; align-items: center; margin-bottom: 32px; }
+  .frac-num { font-family: 'Jua', sans-serif; font-size: 3.6rem; color: var(--text); line-height: 1; }
+  .frac-line { width: 80px; height: 4px; background: var(--text); border-radius: 2px; margin: 6px 0; }
+  .frac-den { font-family: 'Jua', sans-serif; font-size: 3.6rem; color: var(--text); line-height: 1; }
+  .arrow-label { font-size: 1.4rem; font-family: 'Jua', sans-serif; color: var(--text-soft); margin-bottom: 16px; }
+  .answer-fraction { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 24px; }
+  .answer-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .answer-input { width: 80px; height: 64px; border: 3px solid #E3F2FD; border-radius: 14px; text-align: center; font-family: 'Jua', sans-serif; font-size: 1.9rem; color: var(--text); outline: none; transition: border-color 0.2s; background: #F8FBFF; }
+  .answer-input:focus { border-color: var(--sky); background: white; }
+  .answer-input.correct-inp { border-color: var(--green); background: #E8F5E9; color: var(--green-dark); }
+  .answer-input.wrong-inp { border-color: var(--red); background: #FFEBEE; color: var(--red); }
+  .ans-line { width: 80px; height: 3px; background: var(--text); border-radius: 2px; }
+  .btn-submit { width: 100%; background: linear-gradient(135deg, var(--coral), #D84315); color: white; border: none; border-radius: 16px; padding: 18px; font-family: 'Jua', sans-serif; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 16px rgba(255,112,67,0.3); transition: transform 0.15s, box-shadow 0.15s; }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(255,112,67,0.4); }
+  .btn-next { width: 100%; background: linear-gradient(135deg, var(--green), var(--green-dark)); color: white; border: none; border-radius: 16px; padding: 18px; font-family: 'Jua', sans-serif; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 16px rgba(102,187,106,0.3); transition: transform 0.15s; display: none; }
+  .btn-next:hover { transform: translateY(-2px); }
+  .feedback-box { background: #F8FBFF; border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; font-size: 0.95rem; display: none; }
+  .feedback-box.correct { background: #E8F5E9; color: var(--green-dark); border-left: 4px solid var(--green); }
+  .feedback-box.wrong { background: #FFEBEE; color: var(--red); border-left: 4px solid var(--red); }
+  #screen-result { align-items: center; justify-content: center; background: linear-gradient(135deg, #E8F5E9 0%, #E3F2FD 100%); padding: 24px; }
+  .result-card { background: white; border-radius: 28px; padding: 44px 36px 36px; max-width: 440px; width: 100%; box-shadow: var(--shadow); text-align: center; }
+  .result-circle { width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, var(--sky), var(--green)); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 24px rgba(102,187,106,0.25); }
+  .result-score-text { font-family: 'Jua', sans-serif; font-size: 2.4rem; color: white; line-height: 1; }
+  .result-card h2 { font-family: 'Jua', sans-serif; font-size: 1.8rem; color: var(--text); margin-bottom: 8px; }
+  .result-card p { color: var(--text-soft); margin-bottom: 28px; }
+  .result-stats { display: flex; gap: 16px; margin-bottom: 28px; justify-content: center; }
+  .r-stat { background: #F8FBFF; border-radius: 14px; padding: 14px 20px; text-align: center; flex: 1; }
+  .r-stat .val { font-family: 'Jua', sans-serif; font-size: 2rem; }
+  .r-stat .lbl { font-size: 0.82rem; color: var(--text-soft); font-weight: 700; }
+  .r-stat.c .val { color: var(--green-dark); }
+  .r-stat.w .val { color: var(--red); }
+  .btn-retry { width: 100%; background: linear-gradient(135deg, var(--sky), var(--sky-dark)); color: white; border: none; border-radius: 14px; padding: 16px; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; margin-bottom: 10px; transition: transform 0.15s; }
+  .btn-retry:hover { transform: translateY(-2px); }
+  .btn-home-r { background: none; border: 2px solid #E3F2FD; border-radius: 14px; padding: 14px; width: 100%; font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; color: var(--text-soft); }
+  #screen-teacher-login { align-items: center; justify-content: center; background: linear-gradient(135deg, #EDE7F6 0%, #E8EAF6 100%); padding: 24px; }
+  .tlogin-card { background: white; border-radius: 28px; padding: 40px 36px; max-width: 380px; width: 100%; box-shadow: var(--shadow); }
+  .tlogin-card h2 { font-family: 'Jua', sans-serif; font-size: 1.7rem; text-align: center; color: var(--purple); margin-bottom: 6px; }
+  .tlogin-card p { text-align: center; color: var(--text-soft); margin-bottom: 28px; font-size: 0.9rem; }
+  .btn-teacher-login { width: 100%; background: linear-gradient(135deg, var(--purple), #7B1FA2); color: white; border: none; border-radius: 14px; padding: 16px; font-family: 'Jua', sans-serif; font-size: 1.15rem; cursor: pointer; margin-top: 8px; box-shadow: 0 4px 16px rgba(171,71,188,0.25); }
+  .error-msg { color: var(--red); font-size: 0.9rem; text-align: center; margin-top: 10px; display: none; }
+  #screen-dashboard { background: linear-gradient(160deg, #EDE7F6 0%, #E8EAF6 100%); min-height: 100vh; flex-direction: column; }
+  .dash-header { background: white; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 12px rgba(0,0,0,0.07); position: sticky; top: 0; z-index: 10; }
+  .dash-header h1 { font-family: 'Jua', sans-serif; font-size: 1.4rem; color: var(--purple); }
+  .btn-logout { background: #EDE7F6; color: var(--purple); border: none; border-radius: 10px; padding: 8px 18px; cursor: pointer; font-weight: 700; font-size: 0.9rem; font-family: 'Nanum Gothic', sans-serif; transition: background 0.15s; }
+  .btn-logout:hover { background: #CE93D8; color: white; }
+  .dash-body { padding: 24px 28px; max-width: 900px; margin: 0 auto; width: 100%; }
+  .dash-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .sum-card { background: white; border-radius: 18px; padding: 20px 16px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+  .sum-card .sv { font-family: 'Jua', sans-serif; font-size: 2.4rem; line-height: 1; margin-bottom: 4px; }
+  .sum-card .sl { font-size: 0.85rem; color: var(--text-soft); font-weight: 700; }
+  .sum-card.students .sv { color: var(--sky-dark); }
+  .sum-card.sessions .sv { color: var(--purple); }
+  .sum-card.avg .sv { color: var(--green-dark); }
+  .dash-section-title { font-family: 'Jua', sans-serif; font-size: 1.1rem; color: var(--text); margin-bottom: 14px; }
+  .student-table { background: white; border-radius: 18px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 24px; }
+  .student-table table { width: 100%; border-collapse: collapse; }
+  .student-table th { background: #EDE7F6; color: var(--purple); font-family: 'Jua', sans-serif; font-size: 0.9rem; padding: 13px 18px; text-align: left; }
+  .student-table td { padding: 13px 18px; font-size: 0.92rem; border-bottom: 1px solid #F3F4F6; color: var(--text); }
+  .student-table tr:last-child td { border-bottom: none; }
+  .student-table tr:hover td { background: #F8F6FF; }
+  .badge { display: inline-block; border-radius: 999px; padding: 3px 12px; font-size: 0.82rem; font-weight: 700; }
+  .badge.high { background: #E8F5E9; color: var(--green-dark); }
+  .badge.mid { background: #FFF9C4; color: #F57F17; }
+  .badge.low { background: #FFEBEE; color: var(--red); }
+  .detail-btn { background: none; border: 1.5px solid var(--purple); color: var(--purple); border-radius: 8px; padding: 4px 12px; cursor: pointer; font-size: 0.82rem; font-family: 'Nanum Gothic', sans-serif; transition: background 0.15s; }
+  .detail-btn:hover { background: #EDE7F6; }
+  .btn-clear-all { background: #FFEBEE; color: var(--red); border: none; border-radius: 10px; padding: 10px 20px; cursor: pointer; font-weight: 700; font-size: 0.9rem; margin-bottom: 20px; font-family: 'Nanum Gothic', sans-serif; }
+  .btn-refresh { background: #E8F5E9; color: var(--green-dark); border: none; border-radius: 10px; padding: 10px 20px; cursor: pointer; font-weight: 700; font-size: 0.9rem; margin-bottom: 20px; margin-right: 10px; font-family: 'Nanum Gothic', sans-serif; }
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--text-soft); }
+  .empty-state p { font-size: 1.05rem; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: white; border-radius: 24px; padding: 32px 28px; max-width: 480px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 48px rgba(0,0,0,0.18); }
+  .modal-box h3 { font-family: 'Jua', sans-serif; font-size: 1.3rem; color: var(--purple); margin-bottom: 16px; }
+  .session-list { list-style: none; }
+  .session-item { background: #F8F6FF; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; border-left: 3px solid var(--purple); }
+  .session-item .si-date { font-size: 0.82rem; color: var(--text-soft); margin-bottom: 4px; }
+  .session-item .si-score { font-family: 'Jua', sans-serif; font-size: 1.1rem; color: var(--text); }
+  .session-item .si-detail { font-size: 0.82rem; color: var(--text-soft); margin-top: 4px; }
+  .btn-modal-close { width: 100%; background: #EDE7F6; color: var(--purple); border: none; border-radius: 12px; padding: 13px; font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; margin-top: 16px; }
+  .level-select { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .level-btn { background: #F8FBFF; border: 2.5px solid #E3F2FD; border-radius: 16px; padding: 18px 12px; cursor: pointer; text-align: center; transition: all 0.2s; font-family: 'Nanum Gothic', sans-serif; }
+  .level-btn:hover { border-color: var(--sky); background: #E3F2FD; }
+  .level-btn.selected { border-color: var(--sky-dark); background: #E3F2FD; }
+  .level-btn .lv-name { font-family: 'Jua', sans-serif; font-size: 1.05rem; color: var(--text); margin-bottom: 4px; }
+  .level-btn .lv-desc { font-size: 0.82rem; color: var(--text-soft); }
+  .level-btn .lv-tag { display: inline-block; background: var(--sky); color: white; border-radius: 999px; font-size: 0.75rem; padding: 2px 10px; margin-bottom: 6px; font-weight: 700; }
+  .level-btn.lv-medium .lv-tag { background: var(--yellow-dark); }
+  .level-btn.lv-hard .lv-tag { background: var(--coral); }
+  .level-btn.lv-mixed .lv-tag { background: var(--purple); }
+  @media (max-width: 480px) {
+    .home-card { padding: 36px 24px 28px; }
+    .home-title { font-size: 1.7rem; }
+    .frac-num, .frac-den { font-size: 2.8rem; }
+    .dash-body { padding: 16px; }
+    .student-table th, .student-table td { padding: 10px 12px; font-size: 0.85rem; }
+    .dash-summary { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div id="screen-home" class="screen active">
+  <div class="home-card">
+    <div class="home-logo">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="4" width="14" height="3" rx="1.5" fill="white"/>
+        <rect x="6" y="9" width="18" height="3" rx="1.5" fill="white" opacity="0.7"/>
+        <rect x="8" y="22" width="14" height="3" rx="1.5" fill="white"/>
+        <rect x="6" y="27" width="18" height="3" rx="1.5" fill="white" opacity="0.7"/>
+        <rect x="5" y="15" width="22" height="2.5" rx="1.25" fill="#FFD54F"/>
+        <text x="33" y="32" font-size="26" fill="white" font-family="serif">+</text>
+      </svg>
+    </div>
+    <div class="home-title">약분 연습!</div>
+    <div class="home-sub">기약분수 만들기 드릴 연습 사이트</div>
+    <div class="home-btns">
+      <button class="btn-student" onclick="goTo('screen-login')">학생으로 시작하기</button>
+      <button class="btn-teacher" onclick="goTo('screen-teacher-login')">교사 대시보드</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-login" class="screen">
+  <div class="login-card">
+    <h2>학생 입장</h2>
+    <p>이름과 반을 입력하고 연습을 시작해요!</p>
+    <div class="form-group">
+      <label>이름</label>
+      <input type="text" id="input-name" placeholder="홍길동" maxlength="10" />
+    </div>
+    <div class="form-group">
+      <label>반</label>
+      <select id="input-class">
+        <option value="">-- 선택 --</option>
+        <option>1반</option><option>2반</option><option>3반</option>
+        <option>4반</option><option>5반</option><option>6반</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>문제 세트 선택</label>
+      <div class="level-select">
+        <div class="level-btn lv-easy selected" onclick="selectLevel('easy', this)">
+          <div class="lv-tag">쉬움</div>
+          <div class="lv-name">기초 약분</div>
+          <div class="lv-desc">간단한 분수 36문제</div>
+        </div>
+        <div class="level-btn lv-medium" onclick="selectLevel('medium', this)">
+          <div class="lv-tag">보통</div>
+          <div class="lv-name">표준 약분</div>
+          <div class="lv-desc">중간 수준 36문제</div>
+        </div>
+        <div class="level-btn lv-hard" onclick="selectLevel('hard', this)">
+          <div class="lv-tag">어려움</div>
+          <div class="lv-name">심화 약분</div>
+          <div class="lv-desc">큰 수 약분 36문제</div>
+        </div>
+        <div class="level-btn lv-mixed" onclick="selectLevel('mixed', this)">
+          <div class="lv-tag">혼합</div>
+          <div class="lv-name">무작위</div>
+          <div class="lv-desc">랜덤 혼합 36문제</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="startPractice()">연습 시작!</button>
+    <button class="btn-back" onclick="goTo('screen-home')">뒤로가기</button>
+  </div>
+</div>
+
+<div id="screen-practice" class="screen">
+  <div class="practice-header">
+    <div class="student-info" id="practice-student-label">학생 이름</div>
+    <button class="btn-exit" onclick="exitPractice()">나가기</button>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">
+      <span id="progress-text">0 / 36</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-chip correct">정답: <span id="stat-correct">0</span></div>
+    <div class="stat-chip wrong">오답: <span id="stat-wrong">0</span></div>
+    <div class="stat-chip remaining">남은: <span id="stat-remaining">36</span></div>
+  </div>
+  <div class="question-area">
+    <div class="set-label" id="set-label-text"></div>
+    <div class="question-card" id="question-card">
+      <div class="q-number" id="q-number">문제 1 / 36</div>
+      <div class="fraction-display">
+        <div class="frac-num" id="q-numerator">25</div>
+        <div class="frac-line"></div>
+        <div class="frac-den" id="q-denominator">60</div>
+      </div>
+      <div class="arrow-label">= ?</div>
+      <div class="answer-fraction">
+        <div class="answer-col">
+          <input type="number" class="answer-input" id="ans-num" placeholder="?" min="1" max="999" />
+          <div class="ans-line"></div>
+          <input type="number" class="answer-input" id="ans-den" placeholder="?" min="1" max="999" />
+        </div>
+      </div>
+      <div class="feedback-box" id="feedback-box"></div>
+      <button class="btn-submit" id="btn-submit" onclick="checkAnswer()">확인</button>
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()">다음 문제 &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-result" class="screen">
+  <div class="result-card">
+    <div class="result-circle">
+      <div class="result-score-text" id="result-score-display">-</div>
+    </div>
+    <h2 id="result-title">수고했어요!</h2>
+    <p id="result-message">결과를 확인해 보세요.</p>
+    <div class="result-stats">
+      <div class="r-stat c">
+        <div class="val" id="res-correct">0</div>
+        <div class="lbl">정답</div>
+      </div>
+      <div class="r-stat w">
+        <div class="val" id="res-wrong">0</div>
+        <div class="lbl">오답</div>
+      </div>
+      <div class="r-stat">
+        <div class="val" id="res-time">-</div>
+        <div class="lbl">소요시간</div>
+      </div>
+    </div>
+    <button class="btn-retry" onclick="retryPractice()">다시 도전!</button>
+    <button class="btn-home-r" onclick="goTo('screen-home')">처음으로</button>
+  </div>
+</div>
+
+<div id="screen-teacher-login" class="screen">
+  <div class="tlogin-card">
+    <h2>교사 대시보드</h2>
+    <p>교사 비밀번호를 입력해 주세요.<br><small style="color:#AB47BC">(기본 비밀번호: teacher1234)</small></p>
+    <div class="form-group">
+      <label>비밀번호</label>
+      <input type="password" id="teacher-pw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')teacherLogin()" />
+    </div>
+    <button class="btn-teacher-login" onclick="teacherLogin()">로그인</button>
+    <div class="error-msg" id="pw-error">비밀번호가 맞지 않습니다.</div>
+    <button class="btn-back" onclick="goTo('screen-home')">뒤로가기</button>
+  </div>
+</div>
+
+<div id="screen-dashboard" class="screen">
+  <div class="dash-header">
+    <h1>교사 대시보드</h1>
+    <button class="btn-logout" onclick="goTo('screen-home')">로그아웃</button>
+  </div>
+  <div class="dash-body">
+    <div class="dash-summary">
+      <div class="sum-card students">
+        <div class="sv" id="sum-students">0</div>
+        <div class="sl">참여 학생</div>
+      </div>
+      <div class="sum-card sessions">
+        <div class="sv" id="sum-sessions">0</div>
+        <div class="sl">총 연습 횟수</div>
+      </div>
+      <div class="sum-card avg">
+        <div class="sv" id="sum-avg">-</div>
+        <div class="sl">평균 정답률</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:4px;">
+      <button class="btn-refresh" onclick="loadDashboard()">새로고침</button>
+      <button class="btn-clear-all" onclick="clearAllData()">전체 초기화</button>
+    </div>
+    <div class="dash-section-title">학생별 기록</div>
+    <div class="student-table" id="student-table-wrap">
+      <div class="empty-state"><p>아직 연습한 학생이 없어요.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal-box">
+    <h3 id="modal-student-name">학생 상세 기록</h3>
+    <ul class="session-list" id="modal-session-list"></ul>
+    <button class="btn-modal-close" onclick="closeModal()">닫기</button>
+  </div>
+</div>
+
+<script type="module">
+// 1. Firebase 모듈 임포트 (CDN 방식)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// 2. 주신 Firebase 설정값
+const firebaseConfig = {
+  apiKey: "AIzaSyDF-aY7BlH3VbQngh1OJH8o_tRKwHNqa7s",
+  authDomain: "math-1f4be.firebaseapp.com",
+  projectId: "math-1f4be",
+  storageBucket: "math-1f4be.firebasestorage.app",
+  messagingSenderId: "291667841064",
+  appId: "1:291667841064:web:adf9bbbff6706d5a85251d",
+  measurementId: "G-W9J70JS6W2"
+};
+
+// 3. Firebase 초기화
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
+
+// ========== PROBLEM BANK ==========
+const PROBLEMS = {
+  easy: [
+    {n:25,d:60},{n:12,d:39},{n:20,d:25},{n:26,d:42},{n:4,d:16},{n:4,d:84},
+    {n:6,d:42},{n:10,d:54},{n:54,d:68},{n:91,d:98},{n:21,d:24},{n:63,d:66},
+    {n:50,d:98},{n:12,d:66},{n:3,d:66},{n:6,d:8},{n:14,d:24},{n:50,d:52},
+    {n:4,d:8},{n:86,d:96},{n:26,d:39},{n:44,d:88},{n:3,d:6},{n:6,d:38},
+    {n:6,d:12},{n:4,d:12},{n:6,d:32},{n:14,d:36},{n:16,d:80},{n:52,d:80},
+    {n:76,d:92},{n:52,d:72},{n:6,d:36},{n:15,d:21},{n:21,d:56},{n:30,d:51}
+  ],
+  medium: [
+    {n:12,d:38},{n:32,d:54},{n:21,d:90},{n:16,d:42},{n:18,d:38},{n:66,d:68},
+    {n:6,d:15},{n:27,d:90},{n:74,d:84},{n:10,d:20},{n:2,d:22},{n:50,d:80},
+    {n:84,d:90},{n:21,d:39},{n:38,d:100},{n:70,d:78},{n:48,d:52},{n:22,d:26},
+    {n:26,d:60},{n:68,d:74},{n:3,d:12},{n:68,d:92},{n:60,d:92},{n:38,d:46},
+    {n:2,d:6},{n:74,d:100},{n:15,d:18},{n:10,d:75},{n:18,d:60},{n:80,d:82},
+    {n:6,d:57},{n:86,d:96},{n:45,d:78},{n:4,d:16},{n:38,d:82},{n:4,d:10}
+  ],
+  hard: [
+    {n:3,d:63},{n:2,d:6},{n:68,d:90},{n:5,d:10},{n:60,d:90},{n:12,d:26},
+    {n:3,d:6},{n:8,d:56},{n:38,d:100},{n:18,d:44},{n:74,d:76},{n:33,d:55},
+    {n:68,d:96},{n:22,d:46},{n:18,d:27},{n:12,d:21},{n:54,d:84},{n:45,d:50},
+    {n:25,d:50},{n:3,d:18},{n:60,d:74},{n:70,d:85},{n:32,d:42},{n:3,d:15},
+    {n:27,d:33},{n:68,d:84},{n:54,d:86},{n:10,d:28},{n:11,d:66},{n:72,d:96},
+    {n:12,d:80},{n:2,d:54},{n:8,d:38},{n:40,d:48},{n:8,d:68},{n:8,d:16}
+  ]
+};
+
+function getMixed() {
+  const all = [...PROBLEMS.easy, ...PROBLEMS.medium, ...PROBLEMS.hard];
+  return all.sort(() => Math.random() - 0.5).slice(0, 36);
+}
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function simplify(n, d) {
+  const g = gcd(n, d);
+  return { n: n / g, d: d / g };
+}
+
+// ========== STATE ==========
+let currentStudent = { name: '', cls: '' };
+let selectedLevel = 'easy';
+let questions = [];
+let currentQ = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let startTime = null;
+let answered = false;
+
+// ========== 글로벌 함수 연결 (HTML onclick을 위함) ==========
+window.goTo = function(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'screen-dashboard') loadDashboard();
+};
+
+window.selectLevel = function(level, el) {
+  selectedLevel = level;
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+};
+
+window.startPractice = function() {
+  const name = document.getElementById('input-name').value.trim();
+  const cls = document.getElementById('input-class').value;
+  if (!name) { alert('이름을 입력해 주세요!'); return; }
+  if (!cls) { alert('반을 선택해 주세요!'); return; }
+  currentStudent = { name, cls };
+  if (selectedLevel === 'mixed') {
+    questions = getMixed();
+  } else {
+    questions = [...PROBLEMS[selectedLevel]].sort(() => Math.random() - 0.5);
+  }
+  currentQ = 0; correctCount = 0; wrongCount = 0; answered = false;
+  startTime = Date.now();
+  document.getElementById('practice-student-label').textContent = name + ' (' + cls + ')';
+  const levelNames = { easy:'기초 약분', medium:'표준 약분', hard:'심화 약분', mixed:'무작위 혼합' };
+  document.getElementById('set-label-text').textContent = '[' + levelNames[selectedLevel] + '] 기약분수로 나타내세요.';
+  window.goTo('screen-practice');
+  renderQuestion();
+};
+
+window.retryPractice = function() { window.startPractice(); };
+
+window.exitPractice = function() {
+  if (confirm('연습을 그만하시겠어요? 기록은 저장되지 않아요.')) { window.goTo('screen-home'); }
+};
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  answered = false;
+  document.getElementById('q-number').textContent = '문제 ' + (currentQ + 1) + ' / ' + questions.length;
+  document.getElementById('q-numerator').textContent = q.n;
+  document.getElementById('q-denominator').textContent = q.d;
+  document.getElementById('ans-num').value = '';
+  document.getElementById('ans-den').value = '';
+  document.getElementById('ans-num').className = 'answer-input';
+  document.getElementById('ans-den').className = 'answer-input';
+  document.getElementById('ans-num').disabled = false;
+  document.getElementById('ans-den').disabled = false;
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box';
+  fb.style.display = 'none';
+  fb.textContent = '';
+  document.getElementById('btn-submit').style.display = 'block';
+  document.getElementById('btn-next').style.display = 'none';
+  updateProgress();
+  document.getElementById('ans-num').focus();
+}
+
+function updateProgress() {
+  const total = questions.length;
+  const done = currentQ;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('progress-text').textContent = done + ' / ' + total;
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('stat-correct').textContent = correctCount;
+  document.getElementById('stat-wrong').textContent = wrongCount;
+  document.getElementById('stat-remaining').textContent = total - done;
+}
+
+window.checkAnswer = function() {
+  if (answered) return;
+  const numVal = parseInt(document.getElementById('ans-num').value);
+  const denVal = parseInt(document.getElementById('ans-den').value);
+  if (isNaN(numVal) || isNaN(denVal) || numVal <= 0 || denVal <= 0) {
+    alert('분자와 분모를 모두 입력해 주세요!');
+    return;
+  }
+  answered = true;
+  const q = questions[currentQ];
+  const correct = simplify(q.n, q.d);
+  const isCorrect = (numVal === correct.n && denVal === correct.d);
+  const fb = document.getElementById('feedback-box');
+  fb.style.display = 'block';
+  if (isCorrect) {
+    correctCount++;
+    document.getElementById('ans-num').className = 'answer-input correct-inp';
+    document.getElementById('ans-den').className = 'answer-input correct-inp';
+    fb.className = 'feedback-box correct';
+    fb.textContent = '정답! ' + q.n + '/' + q.d + ' = ' + correct.n + '/' + correct.d;
+  } else {
+    wrongCount++;
+    document.getElementById('ans-num').className = 'answer-input wrong-inp';
+    document.getElementById('ans-den').className = 'answer-input wrong-inp';
+    fb.className = 'feedback-box wrong';
+    fb.textContent = '오답! 정답은 ' + correct.n + '/' + correct.d + ' 이에요.';
+  }
+  document.getElementById('ans-num').disabled = true;
+  document.getElementById('ans-den').disabled = true;
+  document.getElementById('btn-submit').style.display = 'none';
+  document.getElementById('btn-next').style.display = 'block';
+  updateProgress();
+};
+
+window.nextQuestion = function() {
+  currentQ++;
+  if (currentQ >= questions.length) { finishPractice(); } 
+  else { renderQuestion(); }
+};
+
+// 결과를 화면에 띄우기 전 Firestore에 비동기로 저장합니다.
+async function finishPractice() {
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  const timeStr = mins + ':' + String(secs).padStart(2, '0');
+  const total = questions.length;
+  const pct = Math.round((correctCount / total) * 100);
+
+  document.getElementById('result-score-display').textContent = pct + '%';
+  document.getElementById('result-title').textContent =
+    pct >= 90 ? '완벽해요!' : pct >= 70 ? '잘했어요!' : pct >= 50 ? '수고했어요!' : '더 연습해봐요!';
+  document.getElementById('result-message').textContent =
+    pct >= 90 ? '거의 다 맞혔어요! 대단해요!' :
+    pct >= 70 ? '약분을 잘 하고 있어요!' :
+    pct >= 50 ? '조금 더 연습하면 잘 할 수 있어요.' : '기약분수 개념을 다시 복습해봐요.';
+  document.getElementById('res-correct').textContent = correctCount;
+  document.getElementById('res-wrong').textContent = wrongCount;
+  document.getElementById('res-time').textContent = timeStr;
+  
+  // 버튼을 비활성화해서 저장 중 여러 번 눌리지 않게 처리
+  document.getElementById('result-message').textContent += ' (기록 저장 중...)';
+  
+  await saveSessionToFirebase(correctCount, total, pct, timeStr);
+  
+  document.getElementById('result-message').textContent = document.getElementById('result-message').textContent.replace(' (기록 저장 중...)', '');
+  window.goTo('screen-result');
+}
+
+// ========== FIREBASE STORAGE (기존 localStorage 대체) ==========
+async function saveSessionToFirebase(correct, total, pct, time) {
+  try {
+    const key = currentStudent.name + '_' + currentStudent.cls;
+    const docRef = doc(db, "records", key);
+    const docSnap = await getDoc(docRef);
+    
+    let record = { name: currentStudent.name, cls: currentStudent.cls, sessions: [] };
+    if (docSnap.exists()) {
+      record = docSnap.data();
+    }
+    
+    record.sessions.push({
+      date: new Date().toLocaleString('ko-KR'),
+      correct, total, pct, time,
+      level: selectedLevel
+    });
+    
+    await setDoc(docRef, record);
+  } catch (e) {
+    console.error("데이터 저장 실패: ", e);
+    alert('기록을 저장하는 중 오류가 발생했습니다.');
+  }
+}
+
+async function getRecordsFromFirebase() {
+  const records = {};
+  try {
+    const querySnapshot = await getDocs(collection(db, "records"));
+    querySnapshot.forEach((doc) => {
+      records[doc.id] = doc.data();
+    });
+  } catch (e) {
+    console.error("데이터 불러오기 실패: ", e);
+  }
+  return records;
+}
+
+// ========== TEACHER DASHBOARD ==========
+const TEACHER_PW = 'teacher1234';
+window.teacherLogin = function() {
+  const pw = document.getElementById('teacher-pw').value;
+  if (pw === TEACHER_PW) {
+    document.getElementById('teacher-pw').value = '';
+    document.getElementById('pw-error').style.display = 'none';
+    window.goTo('screen-dashboard');
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+  }
+};
+
+window.loadDashboard = async function() {
+  const wrap = document.getElementById('student-table-wrap');
+  wrap.innerHTML = '<div class="empty-state"><p>데이터를 불러오는 중입니다...</p></div>';
+
+  const records = await getRecordsFromFirebase();
+  const students = Object.values(records);
+  const totalSessions = students.reduce((s, st) => s + st.sessions.length, 0);
+  const allPcts = students.flatMap(st => st.sessions.map(s => s.pct));
+  const avgPct = allPcts.length ? Math.round(allPcts.reduce((a,b) => a+b, 0) / allPcts.length) : 0;
+
+  document.getElementById('sum-students').textContent = students.length;
+  document.getElementById('sum-sessions').textContent = totalSessions;
+  document.getElementById('sum-avg').textContent = allPcts.length ? avgPct + '%' : '-';
+
+  if (students.length === 0) {
+    wrap.innerHTML = '<div class="empty-state"><p>아직 연습한 학생이 없어요.</p></div>';
+    return;
+  }
+
+  let rows = '';
+  students.sort((a, b) => {
+    const aLast = a.sessions[a.sessions.length - 1];
+    const bLast = b.sessions[b.sessions.length - 1];
+    return new Date(bLast.date) - new Date(aLast.date);
+  });
+
+  students.forEach(st => {
+    const last = st.sessions[st.sessions.length - 1];
+    const avgP = Math.round(st.sessions.reduce((s,x) => s+x.pct, 0) / st.sessions.length);
+    const badgeCls = avgP >= 80 ? 'high' : avgP >= 50 ? 'mid' : 'low';
+    const levelMap = { easy:'기초', medium:'표준', hard:'심화', mixed:'무작위' };
+    const key = st.name + '_' + st.cls;
+    rows += `<tr>
+      <td><strong>${st.name}</strong></td>
+      <td>${st.cls}</td>
+      <td>${st.sessions.length}회</td>
+      <td><span class="badge ${badgeCls}">${avgP}%</span></td>
+      <td>${last.correct}/${last.total} (${levelMap[last.level]||last.level})</td>
+      <td>${last.date}</td>
+      <td><button class="detail-btn" onclick="showDetail('${key}')">상세보기</button></td>
+    </tr>`;
+  });
+
+  wrap.innerHTML = `<table>
+    <thead><tr>
+      <th>이름</th><th>반</th><th>연습 횟수</th><th>평균 정답률</th><th>마지막 결과</th><th>마지막 날짜</th><th></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+};
+
+window.showDetail = async function(key) {
+  const docRef = doc(db, "records", key);
+  const docSnap = await getDoc(docRef);
+  if (!docSnap.exists()) return;
+  
+  const st = docSnap.data();
+  document.getElementById('modal-student-name').textContent = st.name + ' (' + st.cls + ') 상세 기록';
+  const levelMap = { easy:'기초', medium:'표준', hard:'심화', mixed:'무작위' };
+  const items = [...st.sessions].reverse().map((s, i) => `
+    <li class="session-item">
+      <div class="si-date">${s.date}</div>
+      <div class="si-score">${s.pct}% (${s.correct}/${s.total} 정답)</div>
+      <div class="si-detail">세트: ${levelMap[s.level]||s.level} | 소요시간: ${s.time}</div>
+    </li>
+  `).join('');
+  document.getElementById('modal-session-list').innerHTML = items;
+  document.getElementById('detail-modal').classList.add('open');
+};
+
+window.closeModal = function() {
+  document.getElementById('detail-modal').classList.remove('open');
+};
+
+window.clearAllData = async function() {
+  if (confirm('모든 학생 기록을 초기화할까요? 이 작업은 되돌릴 수 없어요.')) {
+    const wrap = document.getElementById('student-table-wrap');
+    wrap.innerHTML = '<div class="empty-state"><p>삭제 중입니다...</p></div>';
+    try {
+      const querySnapshot = await getDocs(collection(db, "records"));
+      // 문서를 하나씩 모두 삭제합니다.
+      const deletePromises = [];
+      querySnapshot.forEach((document) => {
+        deletePromises.push(deleteDoc(doc(db, "records", document.id)));
+      });
+      await Promise.all(deletePromises);
+      window.loadDashboard();
+    } catch(e) {
+      alert("데이터 초기화 중 오류가 발생했습니다.");
+      console.error(e);
+    }
+  }
+};
+
+// 모달 바깥 배경 클릭 시 닫기
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+  if (e.target === this) window.closeModal();
+});
+
+// 엔터키 이벤트 설정
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('ans-den').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (!answered) window.checkAnswer();
+      else window.nextQuestion();
+    }
+  });
+  document.getElementById('ans-num').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('ans-den').focus();
+  });
+});
+</script>
+</body>
+</html>
